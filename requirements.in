@@ -1,0 +1,7 @@
+bids==0.0
+nilearn==0.9.2
+numpy==1.23.4
+pandas==1.5.1
+pybids==0.15.5
+scipy==1.10.0
+tqdm==4.64.1
