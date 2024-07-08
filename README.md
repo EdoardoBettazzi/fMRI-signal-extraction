@@ -3,7 +3,7 @@ The following tool can be used to perform a customized extraction of BOLD signal
 
 ### Setup
 
-In order to read a BIDS-formatted dataset, this tool requires a [dataset_description.json](https://raw.githubusercontent.com/bids-standard/bids-starter-kit/main/templates/dataset_description.json) file within the derivates directory. If your dataset doesn't have it, just create one (in practice it is be sufficient to fill in dataset name and BIDS version; for the sake of open science, it is highly suggested to check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson)).
+In order to read a BIDS-formatted dataset, this tool requires a [dataset_description.json](https://github.com/EdoardoBettazzi/fMRI-signal-extraction/blob/main/dataset_description.json) (check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson) for more details).
 
 ## Installation
 
