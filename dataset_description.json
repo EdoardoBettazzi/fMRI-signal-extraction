@@ -1,0 +1,32 @@
+{
+  "Name": "Dataset derivatives",
+  "BIDSVersion": "",
+  "HEDVersion": "",
+  "DatasetType": "derivative",
+  "License": "",
+  "Authors": [
+    "",
+    "",
+    ""
+  ],
+  "Acknowledgements": "",
+  "HowToAcknowledge": "",
+  "Funding": [
+    "",
+    "",
+    ""
+  ],
+  "EthicsApprovals": [""],
+  "ReferencesAndLinks": [
+    "",
+    "",
+    ""
+  ],
+  "DatasetDOI": "doi:",
+  "GeneratedBy": [
+    {
+      "Name": "fMRIPrep",
+      "Version": ""
+    }
+  ]
+}
