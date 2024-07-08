@@ -1,7 +1,7 @@
 # Signal Extraction with Nilearn
 The following tool can be used to perform a customized extraction of BOLD signals from BIDS-formatted datasets of fMRI scans preprocessed with fMRIPrep (either minimally or with ICA_AROMA). See below for details on the customization.
 
-Important: in order to read a BIDS dataset, the script requires a dataset_description.json file. If the dataset you're interested in doesn't have it, just create one (it is sufficient to fill it with minimal info, check the one in this repo to have an idea).
+Important: in order to read a BIDS dataset, the script requires a dataset_description.json file. If the dataset you're interested in doesn't have it, just create one (it is sufficient to fill it with minimal info, check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson) for a template).
 
 ## Installation
 
