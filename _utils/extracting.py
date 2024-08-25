@@ -10,7 +10,7 @@ from scipy import linalg, io
 from tqdm.auto import tqdm
 
 
-def mean(func_files, configuration_df, atlas, output_folder, matlab=False, csv=False):
+def mean(func_files, configuration_df, atlas, derivatives_folder, output_folder, matlab=False, csv=False):
     
     '''
     Parameters:
@@ -22,6 +22,8 @@ def mean(func_files, configuration_df, atlas, output_folder, matlab=False, csv=F
             Path to the parcellations atlas.
         output_folder: 'str'
             Path to the folder where to return the output file(s).
+        derivatives_folder: 'str'
+            Path to the folder where to subject(s) derivatives are stored.
         matlab: 'bool'
             Set to True, to return the output in .mat format too.
         csv: 'bool'
@@ -41,10 +43,12 @@ def mean(func_files, configuration_df, atlas, output_folder, matlab=False, csv=F
     rois_series = configuration_df[9][:]
     rois_names = configuration_df[11][:]
 
-    # Sanity checks
+   # Sanity checks
     if len(rois_series) != len(rois_names):
         raise ValueError('ROIs labels and names do not match.')
-    
+        
+    rois_series.replace('', pd.NA, inplace=True)
+    rois_names.replace('', pd.NA, inplace=True)
     if rois_series.isnull().values.any() or rois_names.isnull().values.any():
         rois_series = rois_series.dropna()
         rois_names = rois_names.dropna()
@@ -52,7 +56,7 @@ def mean(func_files, configuration_df, atlas, output_folder, matlab=False, csv=F
     if pd.api.types.is_numeric_dtype(rois_series):
         rois = rois_series.tolist()
     else:
-        raise ValueError('One or more ROI labels are not integers.')
+        rois = rois_series.astype(int).tolist()
 
     for r in rois:
         if  r not in labels:
@@ -114,7 +118,7 @@ def mean(func_files, configuration_df, atlas, output_folder, matlab=False, csv=F
         subj_mean_signal = masker.fit_transform(func_files[i], confounds=confounds, sample_mask=sample_mask)
 
         # Output file
-        helpers.output_file(output_folder, subj_mean_signal, func_files[i], configuration_df, atlas, matlab=matlab)
+        helpers.output_file(output_folder, derivatives_folder, subj_mean_signal, func_files[i], configuration_df, atlas, matlab=matlab)
 
         # Subject dataframe
         if csv:
@@ -132,7 +136,7 @@ def mean(func_files, configuration_df, atlas, output_folder, matlab=False, csv=F
         all_subjects_df.to_csv(output_csv , sep=',', index=False)
 
 
-def first_eig(func_files, configuration_df, atlas, output_folder, matlab=False, csv=False):
+def first_eig(func_files, configuration_df, atlas, derivatives_folder, output_folder, matlab=False, csv=False):
     
     """
     Parameters:
@@ -144,6 +148,8 @@ def first_eig(func_files, configuration_df, atlas, output_folder, matlab=False, 
             Path to the parcellation atlas image.
         output_folder: 'str'
             Path to the folder where to return the output file(s).
+        derivatives_folder: 'str'
+            Path to the folder where to subject(s) derivatives are stored.
         matlab: 'bool'
             Set to True, to return the output in .mat format too.
         csv: 'bool'
@@ -163,10 +169,12 @@ def first_eig(func_files, configuration_df, atlas, output_folder, matlab=False, 
     rois_series = configuration_df[9][:]
     rois_names = configuration_df[11][:]
 
-    # Sanity checks
+   # Sanity checks
     if len(rois_series) != len(rois_names):
         raise ValueError('ROIs labels and names do not match.')
-    
+        
+    rois_series.replace('', pd.NA, inplace=True)
+    rois_names.replace('', pd.NA, inplace=True)
     if rois_series.isnull().values.any() or rois_names.isnull().values.any():
         rois_series = rois_series.dropna()
         rois_names = rois_names.dropna()
@@ -174,12 +182,13 @@ def first_eig(func_files, configuration_df, atlas, output_folder, matlab=False, 
     if pd.api.types.is_numeric_dtype(rois_series):
         rois = rois_series.tolist()
     else:
-        raise ValueError('One or more ROI labels are not integers.')
+        rois = rois_series.astype(int).tolist()
     
     for r in rois:
         if  r not in labels:
             raise ValueError(f'ROI label {r} is not in the selected atlas.')
 
+    print(f'Regions of interest under analysis:\n {rois}\n')
     logging.info(f'Regions of interest under analysis:\n {rois}\n')
 
     # Smooth or filter, only if data is minimally processed
@@ -256,7 +265,7 @@ def first_eig(func_files, configuration_df, atlas, output_folder, matlab=False, 
             subj_first_eig_signal[:, r] = roi_eig
 
             # Output file
-            helpers.output_file(output_folder, subj_first_eig_signal, func_files[i], configuration_df, atlas, matlab=matlab)
+            helpers.output_file(output_folder, derivatives_folder, subj_first_eig_signal, func_files[i], configuration_df, atlas, matlab=matlab)
 
             # Subject dataframe
             if csv:

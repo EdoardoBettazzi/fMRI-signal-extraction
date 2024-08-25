@@ -18,7 +18,10 @@ if __name__ == "__main__":
     
     ## Create Layout object to parse input BIDS dataset
     derivatives_path = args.input
-    layout = BIDSLayout(derivatives_path, absolute_paths=True, config=['bids','derivatives'])
+    checking.create_dataset_description(derivatives_path)
+    layout = BIDSLayout(derivatives_path,
+                        absolute_paths=True, 
+                        config=['bids','derivatives'])
 
     ## Parse configuration file, or interact to create one
     if args.configuration:
@@ -43,6 +46,7 @@ if __name__ == "__main__":
         extracting.mean(func_files=functional_files,
                                 configuration_df=config_df,
                                 atlas=args.parcels,
+                                derivatives_folder = derivatives_path,
                                 output_folder=str(output_folder.absolute()),
                                 matlab=args.matlab,
                                 csv=args.csv
@@ -55,6 +59,7 @@ if __name__ == "__main__":
         extracting.first_eig(func_files=functional_files,
                                 configuration_df=config_df,
                                 atlas=args.parcels,
+                                derivatives_folder = derivatives_path,
                                 output_folder=str(output_folder.absolute()),
                                 matlab=args.matlab,
                                 csv=args.csv

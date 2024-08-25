@@ -5,6 +5,7 @@ import numpy as np
 import os
 from pathlib import Path
 from scipy import io
+import shutil
 
 def user_args():
 
@@ -138,12 +139,14 @@ def load_custom_confounds(func_file, configuration_df):
     return confounds, sample_mask
         
         
-def output_file(output_folder, subj_signal, func_file, configuration_df, parcels, matlab=False):
+def output_file(output_folder, derivatives_dir, subj_signal, func_file, configuration_df, parcels, matlab=False):
     
     '''
     Parameters:
         output_folder: 'str'
             Path to the folder where to return the output file(s).
+        derivatives_dir: 'str'
+            Path to the folder where to subject(s) derivatives are stored.
         subj_signal: 'numpy.ndarray'
             Subject's extracted bold signals.
         func_file: 'str'
@@ -161,14 +164,14 @@ def output_file(output_folder, subj_signal, func_file, configuration_df, parcels
     
     rois_labels = configuration_df[9].dropna().tolist()
     rois_names = configuration_df[11].dropna().tolist()
-    
-    if configuration_df[7][0] == 'SVD':
-        reduction_strategy = 'first_eigenv'
-    else:
-        reduction_strategy = 'mean'
-    
-    # Save in .txt format
-    txt_file = os.path.join(output_folder, f"{func_file.partition('func/')[2].partition('.nii')[0]}_{reduction_strategy}_signal.txt")
+
+    # Replicate BIDS tree and save in .txt format
+    path_to_subject = Path(os.path.relpath(func_file, derivatives_dir))
+    output_path = Path(os.path.join(output_folder, path_to_subject))
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    txt_file = str(output_path.with_suffix('').with_suffix('')) + '.txt'
+    print(txt_file)
+    #txt_file = os.path.join(output_folder, f"{func_file.partition('func/')[2].partition('.nii')[0]}.txt")
     atlas = parcels.split('/')[-1]
     with open(txt_file, 'w') as output_txt:
         output_txt.write(f'### HEADER ### ATLAS: {atlas}\n### HEADER ### Regions of interest (reported column-wise):\n{rois_labels}\n{rois_names}\n### HEADER ### Reduction strategy: {configuration_df[7][0]}\n')
@@ -176,7 +179,7 @@ def output_file(output_folder, subj_signal, func_file, configuration_df, parcels
 
     # Save in .mat file
     if matlab:
-        file_mat = os.path.join(output_folder, f"{func_file.partition('func/')[2].partition('.nii')[0]}_{reduction_strategy}_signal.mat")
+        file_mat = os.path.join(output_folder, f"{func_file.partition('func/')[2].partition('.nii')[0]}.mat")
         header = f'{atlas}, {rois_names}, {configuration_df[7][0]}'
         io.savemat(file_mat, {'### HEADER ### ATLAS, Regions of interest, Reduction strategy': header,
                                 'mean_timeseries': subj_signal})

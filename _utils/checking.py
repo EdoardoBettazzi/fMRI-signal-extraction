@@ -1,6 +1,33 @@
 import logging
 import pandas as pd
+import json
+import os
 
+def create_dataset_description(directory):
+    file_path = os.path.join(directory, 'dataset_description.json')
+    
+    if not os.path.exists(file_path):
+        template = {
+            "Name": "Dataset derivatives",
+            "BIDSVersion": "",
+            "HEDVersion": "",
+            "DatasetType": "derivative",
+            "License": "",
+            "Authors": ["", "", ""],
+            "Acknowledgements": "",
+            "HowToAcknowledge": "",
+            "Funding": ["", "", ""],
+            "EthicsApprovals": [""],
+            "ReferencesAndLinks": ["", "", ""],
+            "DatasetDOI": "doi:",
+            "GeneratedBy": [{"Name": "", "Version": ""}]
+        }
+        
+        with open(file_path, 'w') as f:
+            json.dump(template, f, indent=2)
+        print(f"Created dataset_description.json in {directory}")
+    else:
+        print(f"dataset_description.json already exists in {directory}")
 
 def config(configuration_file, layout):
 
@@ -24,7 +51,7 @@ def config(configuration_file, layout):
     # Check if the configuration file exists
     try:
         # Read the file as dataframe
-        config_df = pd.read_csv(configuration_file, header=None)
+        config_df = pd.read_csv(configuration_file, header=None, keep_default_na=False, na_values=['NaN'])
         
         # Check that all 4 columns are present
         cols = config_df.shape[1]
@@ -249,15 +276,13 @@ def confounds(configuration_df):
                 raise ValueError
 
         except ValueError:
-                print(f"One or more values for the {denoise_strategy} denoise strategy parameters are not \
-                available or incorrect. Please, check the configuration file and try again.")
-                logging.error(f'One or more values for the {denoise_strategy} \
-                                 denoise strategy parameters are not available or incorrect.')
+                print(f"One or more values for the {denoise_strategy} denoise strategy parameters are not available or incorrect. Please, check the configuration file and try again.")
+                logging.error(f'One or more values for the {denoise_strategy} denoise strategy parameters are not available or incorrect.')
+
                 return None
 
     else:
-        print(f'Denoising strategy "{denoise_strategy}" is not available.\
-        Please, check the configuration file and choose one among {preset_strategies}')
+        print(f'Denoising strategy "{denoise_strategy}" is not available. Please, check the configuration file and choose one among {preset_strategies}')
         logging.error(f'The denoising strategy {denoise_strategy} is not available.')
         return None
     
