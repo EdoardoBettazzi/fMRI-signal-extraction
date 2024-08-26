@@ -3,7 +3,7 @@ The following tool can be used to perform a customized extraction of BOLD signal
 
 ### Setup
 
-In order to read a BIDS-formatted dataset, this tool requires a [dataset_description.json](https://github.com/EdoardoBettazzi/fMRI-signal-extraction/blob/main/dataset_description.json) (check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson) for more details).
+In order to read a BIDS-formatted dataset, this tool would require a [dataset_description.json](https://github.com/EdoardoBettazzi/fMRI-signal-extraction/blob/main/dataset_description.json) In case the file is not present, an empty dataset_description is created. Still, you're encouraged to add a complete one for the sake of reproducible science (check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson) for more details).
 
 ## Installation
 
@@ -75,7 +75,7 @@ python3 nilearn_signal_extraction.py \
 [--DCM ]
 ```
 
-In the output folder, the script will create a `bold_signals` directory containing, for each subject in the input dataset, a txt (and .mat, if specified in the command) file with the signal extracted for the specified ROIs from the provided atlas.
+In the output folder, the script will replicate the BIDS-formatted derivatives directory tree for each subject. Where the derivatives were stored in the original dataset,a txt (and .mat, if specified in the command) file is created, containing the signals extracted for the specified ROIs from the provided atlas.
 Moreover, if the optional parameter `--DCM` is present, a directory named `DCM_results` and a mat file containing a struct with network details and input/output paths for applying Dynamic Causal Modeling (DCM), are created in the same output directory.
 
 
