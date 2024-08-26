@@ -23,7 +23,7 @@ if __name__ == "__main__":
                         absolute_paths=True, 
                         config=['bids','derivatives'])
 
-    ## Parse configuration file, or interact to create one
+    ## Parse configuration file
     if args.configuration:
         # Check and return verified configuration
         config_df = checking.config(args.configuration, layout)
@@ -35,10 +35,6 @@ if __name__ == "__main__":
     
     ## Get the functional scan
     functional_files = helpers.get_scans(layout, config_df[1])
-
-    ## Create folder to store extracted signals
-    output_folder = Path(os.path.join(args.output, 'bold_signals'))
-    output_folder.mkdir(parents=True, exist_ok=True)
     
     ## Extract signals
     reduction_strategy = config_df[7][0]
@@ -47,23 +43,19 @@ if __name__ == "__main__":
                                 configuration_df=config_df,
                                 atlas=args.parcels,
                                 derivatives_folder = derivatives_path,
-                                output_folder=str(output_folder.absolute()),
+                                output_folder=str(Path(args.output).absolute()),
                                 matlab=args.matlab,
-                                csv=args.csv
+                                csv=args.csv,
+                                DCM=args.DCM
                                 )
-
-        if args.DCM:
-            helpers.dcm_inputs(configuration_df=config_df, output_folder=args.output, bold_signals_folder=str(output_folder.absolute()))
 
     if reduction_strategy == 'SVD':
         extracting.first_eig(func_files=functional_files,
                                 configuration_df=config_df,
                                 atlas=args.parcels,
                                 derivatives_folder = derivatives_path,
-                                output_folder=str(output_folder.absolute()),
+                                output_folder=str(Path(args.output).absolute()),
                                 matlab=args.matlab,
-                                csv=args.csv
+                                csv=args.csv,
+                                DCM=args.DCM
                                 )
-
-        if args.DCM:
-            helpers.dcm_inputs(configuration_df=config_df, output_folder=args.output, bold_signals_folder=str(output_folder.absolute()))

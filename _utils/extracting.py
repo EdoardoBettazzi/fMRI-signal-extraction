@@ -10,7 +10,7 @@ from scipy import linalg, io
 from tqdm.auto import tqdm
 
 
-def mean(func_files, configuration_df, atlas, derivatives_folder, output_folder, matlab=False, csv=False):
+def mean(func_files, configuration_df, atlas, derivatives_folder, output_folder, matlab=False, csv=False, DCM=False):
     
     '''
     Parameters:
@@ -118,7 +118,14 @@ def mean(func_files, configuration_df, atlas, derivatives_folder, output_folder,
         subj_mean_signal = masker.fit_transform(func_files[i], confounds=confounds, sample_mask=sample_mask)
 
         # Output file
-        helpers.output_file(output_folder, derivatives_folder, subj_mean_signal, func_files[i], configuration_df, atlas, matlab=matlab)
+        helpers.output_file(output_folder, 
+                            derivatives_folder, 
+                            subj_mean_signal, 
+                            func_files[i], 
+                            configuration_df, 
+                            atlas, 
+                            matlab=matlab, 
+                            DCM=DCM)
 
         # Subject dataframe
         if csv:
@@ -136,7 +143,7 @@ def mean(func_files, configuration_df, atlas, derivatives_folder, output_folder,
         all_subjects_df.to_csv(output_csv , sep=',', index=False)
 
 
-def first_eig(func_files, configuration_df, atlas, derivatives_folder, output_folder, matlab=False, csv=False):
+def first_eig(func_files, configuration_df, atlas, derivatives_folder, output_folder, matlab=False, csv=False, DCM=False):
     
     """
     Parameters:
@@ -265,7 +272,14 @@ def first_eig(func_files, configuration_df, atlas, derivatives_folder, output_fo
             subj_first_eig_signal[:, r] = roi_eig
 
             # Output file
-            helpers.output_file(output_folder, derivatives_folder, subj_first_eig_signal, func_files[i], configuration_df, atlas, matlab=matlab)
+            helpers.output_file(output_folder, 
+                                derivatives_folder, 
+                                subj_first_eig_signal, 
+                                func_files[i], 
+                                configuration_df, 
+                                atlas, 
+                                matlab=matlab,
+                                DCM=DCM)
 
             # Subject dataframe
             if csv:

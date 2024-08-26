@@ -139,7 +139,7 @@ def load_custom_confounds(func_file, configuration_df):
     return confounds, sample_mask
         
         
-def output_file(output_folder, derivatives_dir, subj_signal, func_file, configuration_df, parcels, matlab=False):
+def output_file(output_folder, derivatives_dir, subj_signal, func_file, configuration_df, parcels, matlab=False, DCM=False):
     
     '''
     Parameters:
@@ -170,8 +170,7 @@ def output_file(output_folder, derivatives_dir, subj_signal, func_file, configur
     output_path = Path(os.path.join(output_folder, path_to_subject))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     txt_file = str(output_path.with_suffix('').with_suffix('')) + '.txt'
-    print(txt_file)
-    #txt_file = os.path.join(output_folder, f"{func_file.partition('func/')[2].partition('.nii')[0]}.txt")
+
     atlas = parcels.split('/')[-1]
     with open(txt_file, 'w') as output_txt:
         output_txt.write(f'### HEADER ### ATLAS: {atlas}\n### HEADER ### Regions of interest (reported column-wise):\n{rois_labels}\n{rois_names}\n### HEADER ### Reduction strategy: {configuration_df[7][0]}\n')
@@ -184,8 +183,12 @@ def output_file(output_folder, derivatives_dir, subj_signal, func_file, configur
         io.savemat(file_mat, {'### HEADER ### ATLAS, Regions of interest, Reduction strategy': header,
                                 'mean_timeseries': subj_signal})
         
+    # Create subject specific DCM file
+    if DCM:
+        dcm_inputs(configuration_df, str(output_path.parent))
 
-def dcm_inputs(configuration_df, output_folder, bold_signals_folder):
+
+def dcm_inputs(configuration_df, output_folder):
 
     '''
     Parameters:
@@ -193,8 +196,6 @@ def dcm_inputs(configuration_df, output_folder, bold_signals_folder):
             Dataframe containing all the necessary information to perform the signal extraction.
         output_folder: 'str'
             Path to the folder where to return the output file(s).
-        bold_signals_folder: 'str'
-            Path to the folder where the extracted signals are stored.
 
     Returns:
         mat file containing input info for a DCM workflow.
@@ -213,7 +214,7 @@ def dcm_inputs(configuration_df, output_folder, bold_signals_folder):
     io.savemat(matfile,
             {'labels': rois_labels,
                 'names': np.array(rois_names,dtype=object),
-                'input_path': bold_signals_folder,
+                'input_path': output_folder,
                 'output_path': str(dcm_results_folder.absolute())},
                 oned_as='column'
             )
