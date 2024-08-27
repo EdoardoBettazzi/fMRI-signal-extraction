@@ -178,9 +178,9 @@ def output_file(output_folder, derivatives_dir, subj_signal, func_file, configur
 
     # Save in .mat file
     if matlab:
-        file_mat = os.path.join(output_folder, f"{func_file.partition('func/')[2].partition('.nii')[0]}.mat")
+        mat_file = str(output_path.with_suffix('').with_suffix('')) + '.mat'
         header = f'{atlas}, {rois_names}, {configuration_df[7][0]}'
-        io.savemat(file_mat, {'### HEADER ### ATLAS, Regions of interest, Reduction strategy': header,
+        io.savemat(mat_file, {'### HEADER ### ATLAS, Regions of interest, Reduction strategy': header,
                                 'mean_timeseries': subj_signal})
         
     # Create subject specific DCM file
@@ -215,6 +215,6 @@ def dcm_inputs(configuration_df, output_folder):
             {'labels': rois_labels,
                 'names': np.array(rois_names,dtype=object),
                 'input_path': output_folder,
-                'output_path': str(dcm_results_folder.absolute())},
+                'output_path': str(dcm_results_folder)},
                 oned_as='column'
             )

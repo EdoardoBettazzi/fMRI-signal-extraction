@@ -43,7 +43,7 @@ if __name__ == "__main__":
                                 configuration_df=config_df,
                                 atlas=args.parcels,
                                 derivatives_folder = derivatives_path,
-                                output_folder=str(Path(args.output).absolute()),
+                                output_folder=str(Path(args.output)), #.absolute()
                                 matlab=args.matlab,
                                 csv=args.csv,
                                 DCM=args.DCM
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                                 configuration_df=config_df,
                                 atlas=args.parcels,
                                 derivatives_folder = derivatives_path,
-                                output_folder=str(Path(args.output).absolute()),
+                                output_folder=str(Path(args.output)), #.absolute()
                                 matlab=args.matlab,
                                 csv=args.csv,
                                 DCM=args.DCM
