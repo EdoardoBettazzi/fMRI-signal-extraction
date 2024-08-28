@@ -183,12 +183,13 @@ def output_file(output_folder, derivatives_dir, subj_signal, func_file, configur
         io.savemat(mat_file, {'### HEADER ### ATLAS, Regions of interest, Reduction strategy': header,
                                 'mean_timeseries': subj_signal})
         
-    # Create subject specific DCM file
+    # Create folder for DCM results
     if DCM:
-        dcm_inputs(configuration_df, str(output_path.parent))
+        dcm_results_folder = Path(os.path.join(str(output_path.parent), 'DCM_results'))
+        dcm_results_folder.mkdir(parents=True, exist_ok=True)
 
 
-def dcm_inputs(configuration_df, output_folder):
+def dcm_config(configuration_df, output_folder):
 
     '''
     Parameters:
@@ -201,20 +202,16 @@ def dcm_inputs(configuration_df, output_folder):
         mat file containing input info for a DCM workflow.
     '''
 
-    # Create output folder for DCM results
-    dcm_results_folder = Path(os.path.join(output_folder, 'DCM_results'))
-    dcm_results_folder.mkdir(parents=True, exist_ok=True)
-
     # Regions' labels and names
     rois_labels = configuration_df[9].dropna().tolist()
     rois_names = configuration_df[11].dropna().tolist()
 
     # Save in mat format
-    matfile = os.path.join(output_folder, 'dcm_inputs.mat')
+    matfile = os.path.join(output_folder, 'dcm_config.mat')
     io.savemat(matfile,
             {'labels': rois_labels,
                 'names': np.array(rois_names,dtype=object),
                 'input_path': output_folder,
-                'output_path': str(dcm_results_folder)},
+                'output_path': './DCM_results'},
                 oned_as='column'
             )

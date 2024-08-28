@@ -43,19 +43,27 @@ if __name__ == "__main__":
                                 configuration_df=config_df,
                                 atlas=args.parcels,
                                 derivatives_folder = derivatives_path,
-                                output_folder=str(Path(args.output)), #.absolute()
+                                output_folder=str(args.output),
                                 matlab=args.matlab,
                                 csv=args.csv,
                                 DCM=args.DCM
                                 )
+        
+        # Create config file for DCM
+        if args.DCM:
+            helpers.dcm_config(config_df, args.output)
 
     if reduction_strategy == 'SVD':
         extracting.first_eig(func_files=functional_files,
                                 configuration_df=config_df,
                                 atlas=args.parcels,
                                 derivatives_folder = derivatives_path,
-                                output_folder=str(Path(args.output)), #.absolute()
+                                output_folder=args.output,
                                 matlab=args.matlab,
                                 csv=args.csv,
                                 DCM=args.DCM
                                 )
+        
+        # Create config file for DCM
+        if args.DCM:
+            helpers.dcm_config(config_df, args.output)
