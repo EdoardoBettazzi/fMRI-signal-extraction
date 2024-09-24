@@ -3,7 +3,8 @@ The following tool can be used to perform a customized extraction of BOLD signal
 
 ### Setup
 
-In order to read a BIDS-formatted dataset, this tool would require a [dataset_description.json](https://github.com/EdoardoBettazzi/fMRI-signal-extraction/blob/main/dataset_description.json) In case the file is not present, an empty dataset_description is created. Still, you're encouraged to add a complete one for the sake of reproducible science (check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson) for more details).
+In order to read a BIDS-formatted dataset, this tool would require a [dataset_description.json](https://github.com/EdoardoBettazzi/fMRI-signal-extraction/blob/main/dataset_description.json) file. In case the file is not present, an empty dataset_description.json is created. 
+Still, you're encouraged to add a complete one for the sake of reproducible science (check [BIDS recommendations](https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files.html#dataset_descriptionjson) for more details).
 
 ## Installation
 
@@ -84,6 +85,17 @@ The output txt file presents a header in the first 3 lines, reporting some basic
 ```### HEADER ### ATLAS:               ```  
 ```### HEADER ### Regions of interest: ```  
 ```### HEADER ### Reduction strategy:  ```
+
+## Compatibility and Testing
+
+This tool has been tested and verified to work on the following environment:
+
+- **Operating System**: Debian (Linux)
+
+### Note:
+While the tool is expected to work on other Unix-like systems (e.g., Ubuntu, Fedora), it has not been explicitly tested on these platforms. Testing on macOS and Windows is planned for future releases.
+
+If you encounter any issues on other platforms, please report them in the Issues section.
 
 ## Contributing
 
