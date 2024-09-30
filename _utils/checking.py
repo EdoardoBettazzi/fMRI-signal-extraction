@@ -149,9 +149,21 @@ def BIDSquery(configuration_df, layout):
                 return False
         else:
             raise ValueError
+        
     except ValueError:
-            logging.error('One or more values for querying the BIDS dataset are incorrect.')
-            return False
+        
+        if not dtype:
+            logging.error('Datatype value is incorrect')
+        if not task:
+            logging.error('Task value is incorrect')
+        if not preprocessing:
+            logging.error('Preprocessing value is incorrect')
+        if not session:
+            logging.error('Session value is incorrect')
+        if not template:
+            logging.error('Template value is incorrect')
+
+        return False
 
 
 def rois(configuration_df):
