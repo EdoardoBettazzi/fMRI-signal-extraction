@@ -182,11 +182,6 @@ def output_file(output_folder, derivatives_dir, subj_signal, func_file, configur
         header = f'{atlas}, {rois_names}, {configuration_df[7][0]}'
         io.savemat(mat_file, {'### HEADER ### ATLAS, Regions of interest, Reduction strategy': header,
                                 'mean_timeseries': subj_signal})
-        
-    # Create folder for DCM results
-    if DCM:
-        dcm_results_folder = Path(os.path.join(str(output_path.parent), 'DCM_results'))
-        dcm_results_folder.mkdir(parents=True, exist_ok=True)
 
 
 def dcm_config(configuration_df, output_folder):
