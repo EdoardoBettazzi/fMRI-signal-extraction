@@ -296,53 +296,17 @@ def first_eig(func_files, configuration_df, atlas, derivatives_folder, output_fo
         output_csv = os.path.join(output_folder, 'all_subjects_signals.csv')
         all_subjects_df.to_csv(output_csv , sep=',', index=False)
 
-
 def extract_eig(A):
-    """
-    Exact Python translation of SPM12's eigenvariate extraction from spm_regions.m
     
-    This function computes the first eigenvariate (principal component) of a region's 
-    timeseries data, scaled exactly as SPM12 does for DCM compatibility.
-    
-    MATLAB source (lines 288-301 in spm_regions.m):
-    [m,n]   = size(y);
-    if m > n
-        [v,s,v] = svd(y'*y);
-        s       = diag(s);
-        v       = v(:,1);
-        u       = y*v/sqrt(s(1));
-    else
-        [u,s,u] = svd(y*y');
-        s       = diag(s);
-        u       = u(:,1);
-        v       = y'*u/sqrt(s(1));
-    end
-    d       = sign(sum(v));
-    u       = u*d;
-    v       = v*d;
-    Y       = u*sqrt(s(1)/n);
-    
+    '''
     Parameters:
-    -----------
-    A : array_like, shape (m, n)
-        Input timeseries data where:
-        - m = number of timepoints (scans)
-        - n = number of voxels in the region
+
+        A                       matrix of shape (m)x(n), where m is the number of timesteps and n number of voxels.
         
     Returns:
-    --------
-    Y : ndarray, shape (m,)
-        First eigenvariate scaled exactly as SPM12
-        - Represents the dominant temporal pattern across all voxels
-        
-    Notes:
-    ------
-    - This preserves SPM12's exact scaling: Y = u * sqrt(s[0] / n)
-    - Critical for DCM: maintains region-specific variance information
-    - Different SVD path chosen based on matrix dimensions for efficiency
-    - Sign correction ensures consistent orientation across subjects
-    """
-    
+        first_eig               First normalized eigenvariate
+    '''
+
     # Get matrix dimensions
     m, n = A.shape  
     
@@ -386,5 +350,8 @@ def extract_eig(A):
     # Scales the eigenvariate proportionally to the explained variance and region size
     Y = u * np.sqrt(s[0] / n)
     
+    # Normalize the eigenvariate to have zero mean and unit variance
+    Y = (Y - np.mean(Y)) / np.std(Y)
     
+    # Return first eigenvariate 
     return Y

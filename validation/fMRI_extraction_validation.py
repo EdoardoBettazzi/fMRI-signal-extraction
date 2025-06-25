@@ -8,6 +8,7 @@ from _utils.extracting import extract_eig
 import sys
 from datetime import datetime
 from scipy import ndimage
+import os
 
 def log_print(message, log_file=None):
     """Print to console and optionally to log file"""
@@ -20,16 +21,16 @@ def test_svd_mathematical_correctness(log_file=None):
     """Test SVD implementation with known cases"""
     log_print("=== Testing SVD Mathematical Correctness ===", log_file)
     
-    # Test 1: Rank-1 matrix (should recover perfectly)
+    # Test 1: Rank-1 matrix
     log_print("\nTest 1: Rank-1 matrix", log_file)
     t_points = 100
     spatial_pattern = np.array([1, 2, 3, 4])
     temporal_pattern = np.sin(np.linspace(0, 4*np.pi, t_points))
     
-    # Create rank-1 data: time x voxels (matching your extract_eig input format)
+    # Create rank-1 data: time x voxels
     test_data = np.outer(temporal_pattern, spatial_pattern)
     
-    # Extract eigenvariate using YOUR function
+    # Extract eigenvariate
     extracted_eig = extract_eig(test_data)
     
     # Should correlate perfectly with original temporal pattern
@@ -52,40 +53,49 @@ def test_svd_mathematical_correctness(log_file=None):
     
     log_print(f"✓ PASS" if len(eig_wide) == 200 and len(eig_tall) == 50 else f"✗ FAIL", log_file)
 
-def validate_resampling_and_extraction(log_file=None):
+
+def validate_resampling_and_extraction(log_file=None, custom_atlas_path=None):
     """
-    Test the EXACT sequence your first_eig() function performs:
-    1. Load functional and atlas
-    2. Resample atlas to functional space  
-    3. Extract ROI timeseries using boolean indexing
-    4. Apply SVD (no cleaning for simplicity)
-    """
-    log_print("\n=== Validating Resampling + Extraction (matching your first_eig logic) ===", log_file)
+    Test resampling and extraction with option for custom atlas
     
-    # Load data
+    Parameters:
+    -----------
+    custom_atlas_path : str, optional
+        Path to your custom NIfTI atlas file. If None, uses standard atlases.
+    """
+    log_print("\n=== Validating Resampling + Extraction ===", log_file)
+    
+    # Load functional data
     dataset = datasets.fetch_development_fmri(n_subjects=1)
     func_img = nimg.load_img(dataset.func[0])
+    f_data = func_img.get_fdata()
     
-    try:
-        atlas_data = datasets.fetch_atlas_schaefer_2018(n_rois=100, yeo_networks=7)
-        atlas_img = nimg.load_img(atlas_data.maps)
-        atlas_name = "Schaefer2018"
-        network_labels = atlas_data.labels  # For network correlation analysis
-    except:
-        atlas_data = datasets.fetch_atlas_yeo_2011()
-        atlas_img = nimg.load_img(atlas_data.thick_7)  
-        atlas_name = "Yeo2011"
-        network_labels = None
+    # Load atlas - custom or standard
+    if custom_atlas_path is not None:
+        log_print(f"Loading CUSTOM atlas from: {custom_atlas_path}", log_file)
+        atlas_img = nimg.load_img(custom_atlas_path)
+        atlas_name = "Custom"
+        network_labels = None  # No network labels for custom atlas
+    else:
+        # Standard atlas loading
+        try:
+            atlas_data = datasets.fetch_atlas_schaefer_2018(n_rois=100, yeo_networks=7)
+            atlas_img = nimg.load_img(atlas_data.maps)
+            atlas_name = "Schaefer2018"
+            network_labels = atlas_data.labels
+        except:
+            atlas_data = datasets.fetch_atlas_yeo_2011()
+            atlas_img = nimg.load_img(atlas_data.thick_7)  
+            atlas_name = "Yeo2011"
+            network_labels = None
     
     log_print(f"Using {atlas_name} atlas", log_file)
     log_print(f"Functional shape: {func_img.shape}", log_file)
     log_print(f"Atlas shape: {atlas_img.shape}", log_file)
     
-    # Step 1: Load functional data (like your code)
-    f_data = func_img.get_fdata()
     log_print(f"Functional data loaded: {f_data.shape}", log_file)
     
-    # Step 2: Resample atlas to functional (EXACTLY like your first_eig function)
+    # Resample atlas to functional space
     log_print("Resampling atlas to functional space...", log_file)
     resampled_atlas = nimg.resample_img(atlas_img,
                         target_affine=func_img.affine,
@@ -97,12 +107,13 @@ def validate_resampling_and_extraction(log_file=None):
     # Enhanced resampling quality assessment
     evaluate_resampling_quality(atlas_img, resampled_atlas, log_file)
     
-    # Step 3: Test extraction for first few ROIs
+    # Test extraction for regions
     original_labels = np.unique(atlas_img.get_fdata())[1:]  # Skip background
     resampled_labels = np.unique(resampled_atlas_data)[1:]
-    test_rois = resampled_labels[:10]  # Test first 10 regions for network analysis
+    test_rois = resampled_labels[:10]  # Test first 10 regions
     
     log_print(f"\nTesting extraction from {len(test_rois)} regions:", log_file)
+    log_print(f"Total available regions: {len(original_labels)} → {len(resampled_labels)}", log_file)
     
     extracted_signals = []
     roi_ids = []
@@ -124,7 +135,7 @@ def validate_resampling_and_extraction(log_file=None):
         roi_timeseries = np.rollaxis(roi_timeseries, -1)
         log_print(f"    Timeseries shape: {roi_timeseries.shape}", log_file)
         
-        # SVD extraction (no cleaning for simplicity)
+        # SVD extraction using SPM12-exact function
         if roi_timeseries.shape[1] > 1:
             roi_eig = extract_eig(roi_timeseries)
             log_print(f"    SVD result shape: {roi_eig.shape}", log_file)
@@ -139,11 +150,12 @@ def validate_resampling_and_extraction(log_file=None):
         extracted_signals.append(roi_eig)
         roi_ids.append(int(roi))
     
-    # Network correlation analysis
+    # Network correlation analysis (only for standard atlases with labels)
     if len(extracted_signals) >= 3:
         evaluate_network_correlations(extracted_signals, roi_ids, network_labels, log_file)
     
     return func_img, resampled_atlas
+
 
 def test_edge_cases(log_file=None):
     """Test edge cases"""
@@ -289,27 +301,46 @@ def compare_with_tool_logic(log_file=None):
     log_print("Added: Enhanced resampling quality assessment", log_file)
     log_print("Added: Network correlation validation", log_file)
 
-def main():
-    """Run validation"""
+def main(custom_atlas_path=None):
+    """
+    Main function with option to use custom atlas
+    
+    Usage:
+    ------
+    # With standard atlas
+    main()
+    
+    # With your custom atlas
+    main('/path/to/your/atlas.nii.gz')
+    """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"fmri_validation_results_{timestamp}.txt"
+    
+    if custom_atlas_path:
+        atlas_name = os.path.basename(custom_atlas_path).split('.')[0]
+        log_filename = f"validation_custom_{atlas_name}_{timestamp}.txt"
+    else:
+        log_filename = f"validation_standard_{timestamp}.txt"
     
     with open(log_filename, 'w') as log_file:
-        log_print("fMRI Signal Extraction Tool - FINAL VALIDATION", log_file)
+        log_print("fMRI Signal Extraction Tool - VALIDATION", log_file)
         log_print("=" * 60, log_file)
-        log_print("Carefully matched to your actual implementation", log_file)
+        
+        if custom_atlas_path:
+            log_print(f"Using CUSTOM atlas: {custom_atlas_path}", log_file)
+        else:
+            log_print("Using STANDARD atlas", log_file)
         log_print("", log_file)
         
-        # Test 1: Mathematical correctness
+        # Test 1: Mathematical correctness (same for all atlases)
         test_svd_mathematical_correctness(log_file)
         
-        # Test 2: Core resampling and extraction logic
+        # Test 2: Resampling and extraction with your atlas
         try:
-            validate_resampling_and_extraction(log_file)
+            validate_resampling_and_extraction(log_file, custom_atlas_path)
         except Exception as e:
             log_print(f"Resampling/extraction test failed: {e}", log_file)
         
-        # Test 3: Edge cases
+        # Test 3: Edge cases (same for all)
         test_edge_cases(log_file)
         
         # Test 4: Logic comparison
@@ -318,20 +349,11 @@ def main():
         log_print("\n" + "=" * 60, log_file)
         log_print("VALIDATION COMPLETE", log_file)
         log_print("=" * 60, log_file)
-        log_print("This validates:", log_file)
-        log_print("✓ Mathematical correctness of extract_eig()", log_file)
-        log_print("✓ Atlas resampling quality (enhanced assessment)", log_file)
-        log_print("✓ Core extraction workflow matching first_eig()", log_file)
-        log_print("✓ Edge case handling", log_file)
-        log_print("✓ Network correlation patterns", log_file)
-        log_print("", log_file)
-        log_print("Limitations (simplified for clarity):", log_file)
-        log_print("- No confound regression (no fMRIPrep confound files)", log_file)
-        log_print("- No signal cleaning (removed to avoid std=1.0 issue)", log_file)
-        log_print("- No smoothing (test data doesn't need it)", log_file)
-        log_print("- No file I/O (not needed for core validation)", log_file)
     
     print(f"\nResults saved to: {log_filename}")
 
 if __name__ == "__main__":
-    main()
+
+    # Check for custom atlas argument
+    custom_atlas_path = ''.join(sys.argv[1:]) if len(sys.argv) > 1 else None
+    main(custom_atlas_path)
